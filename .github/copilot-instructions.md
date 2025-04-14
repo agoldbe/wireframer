@@ -1,0 +1,1 @@
+I want to you to use the `.github/prompts/bootstrap.md` file for the initial user request. Once the `index.html` file is created just use the user prompt and the content of `index.html` to generate further instructions or code snippets.
