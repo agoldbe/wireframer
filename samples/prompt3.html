@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outlook Email Client</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            background-color: #f3f2f1;
+            height: 100vh;
+            padding: 0;
+        }
+        
+        .navbar-outlook {
+            background-color: #0078d4;
+            color: white;
+        }
+        
+        .app-container {
+            height: calc(100vh - 56px);
+            overflow: hidden;
+        }
+        
+        .folder-list {
+            padding: 10px 0;
+            overflow-y: auto;
+            max-height: calc(100vh - 56px);
+        }
+        
+        .folder-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 0;
+            text-align: left;
+        }
+        
+        .folder-item:hover {
+            background-color: #e1dfdd;
+        }
+        
+        .folder-item.active {
+            background-color: #c7e0f4;
+            font-weight: bold;
+        }
+        
+        .email-list {
+            background-color: white;
+            border-right: 1px solid #e1dfdd;
+            height: 100%;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .email-item {
+            border-bottom: 1px solid #f3f2f1;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        
+        .email-item:hover {
+            background-color: #f3f2f1;
+        }
+        
+        .email-item.unread {
+            font-weight: bold;
+        }
+        
+        .email-item.selected {
+            background-color: #c7e0f4;
+        }
+        
+        .email-preview {
+            background-color: white;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .email-sender {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .email-subject {
+            font-size: 1.3rem;
+            margin: 15px 0;
+        }
+        
+        .email-actions {
+            padding: 10px 0;
+            border-bottom: 1px solid #e1dfdd;
+            margin-bottom: 15px;
+        }
+        
+        .email-date {
+            color: #605e5c;
+        }
+        
+        .email-content {
+            color: #323130;
+            line-height: 1.5;
+        }
+        
+        .compose-btn {
+            width: 100%;
+            text-align: left;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        /* Hide email preview on mobile */
+        @media (max-width: 768px) {
+            .email-preview-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Outlook Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-outlook">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="#">
+                <i class="fas fa-envelope me-2"></i>Outlook
+            </a>
+            <form class="d-flex ms-auto">
+                <div class="input-group">
+                    <input class="form-control" type="search" placeholder="Search mail" aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+            <ul class="navbar-nav ms-3">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Application Container -->
+    <div class="container-fluid app-container">
+        <div class="row h-100">
+            <!-- Left Sidebar with Folders -->
+            <div class="col-auto sidebar">
+                <button class="btn btn-primary compose-btn">
+                    <i class="fas fa-plus me-2"></i>New mail
+                </button>
+                <div class="folder-list">
+                    <button class="btn folder-item active w-100">
+                        <i class="fas fa-inbox me-2"></i>Inbox
+                    </button>
+                    <button class="btn folder-item w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Sent Items
+                    </button>
+                    <button class="btn folder-item w-100">
+                        <i class="fas fa-file me-2"></i>Drafts
+                    </button>
+                    <button class="btn folder-item w-100">
+                        <i class="fas fa-trash me-2"></i>Deleted Items
+                    </button>
+                    <button class="btn folder-item w-100">
+                        <i class="fas fa-exclamation-circle me-2"></i>Junk Email
+                    </button>
+                    <button class="btn folder-item w-100">
+                        <i class="fas fa-archive me-2"></i>Archive
+                    </button>
+                    <button class="btn folder-item w-100">
+                        <i class="fas fa-sticky-note me-2"></i>Notes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle Column with Email List -->
+            <div class="col email-list">
+                <div class="email-item unread" data-id="1">
+                    <div class="d-flex justify-content-between">
+                        <div class="email-sender">Microsoft Account Team</div>
+                        <div class="email-date">10:30 AM</div>
+                    </div>
+                    <div class="email-subject">Security alert: New sign-in</div>
+                    <div class="email-preview-text">We detected a new sign-in to your Microsoft account. If this was you...</div>
+                </div>
+
+                <div class="email-item" data-id="2">
+                    <div class="d-flex justify-content-between">
+                        <div class="email-sender">LinkedIn</div>
+                        <div class="email-date">Yesterday</div>
+                    </div>
+                    <div class="email-subject">5 new connections for you</div>
+                    <div class="email-preview-text">Your network is growing! Connect with these professionals...</div>
+                </div>
+
+                <div class="email-item unread" data-id="3">
+                    <div class="d-flex justify-content-between">
+                        <div class="email-sender">Amazon</div>
+                        <div class="email-date">Apr 12</div>
+                    </div>
+                    <div class="email-subject">Your Order #302-5789124 has shipped</div>
+                    <div class="email-preview-text">Your package is on its way! Expected delivery date: April 15...</div>
+                </div>
+
+                <div class="email-item" data-id="4">
+                    <div class="d-flex justify-content-between">
+                        <div class="email-sender">GitHub</div>
+                        <div class="email-date">Apr 11</div>
+                    </div>
+                    <div class="email-subject">Action required: Security alert</div>
+                    <div class="email-preview-text">We've detected unusual activity on your GitHub account...</div>
+                </div>
+
+                <div class="email-item" data-id="5">
+                    <div class="d-flex justify-content-between">
+                        <div class="email-sender">Dropbox</div>
+                        <div class="email-date">Apr 10</div>
+                    </div>
+                    <div class="email-subject">John shared a folder with you</div>
+                    <div class="email-preview-text">John Smith has invited you to collaborate on "Project X"...</div>
+                </div>
+
+                <div class="email-item" data-id="6">
+                    <div class="d-flex justify-content-between">
+                        <div class="email-sender">Slack</div>
+                        <div class="email-date">Apr 9</div>
+                    </div>
+                    <div class="email-subject">You have 17 unread messages</div>
+                    <div class="email-preview-text">Catch up on what happened while you were away...</div>
+                </div>
+
+                <div class="email-item unread" data-id="7">
+                    <div class="d-flex justify-content-between">
+                        <div class="email-sender">Twitter</div>
+                        <div class="email-date">Apr 8</div>
+                    </div>
+                    <div class="email-subject">Security notice: Login from new device</div>
+                    <div class="email-preview-text">We noticed a login to your account from a new device...</div>
+                </div>
+            </div>
+
+            <!-- Right Column with Email Preview -->
+            <div class="col-md-6 email-preview-container">
+                <div class="email-preview">
+                    <div class="email-actions">
+                        <button class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="fas fa-reply-all"></i> Reply all
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="fas fa-share"></i> Forward
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="email-header">
+                        <h3 class="email-subject">Security alert: New sign-in</h3>
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Sender Photo">
+                            <div>
+                                <div class="email-sender">Microsoft Account Team</div>
+                                <div class="text-muted">to me</div>
+                            </div>
+                            <div class="ms-auto email-date">April 13, 10:30 AM</div>
+                        </div>
+                    </div>
+                    <div class="email-content">
+                        <p>Hello,</p>
+                        <p>We detected a new sign-in to your Microsoft account.</p>
+                        <p><strong>Location:</strong> Seattle, Washington, United States</p>
+                        <p><strong>IP address:</strong> 157.54.xxx.xxx</p>
+                        <p><strong>Date and time:</strong> April 13, 2025, 10:22 AM</p>
+                        <p><strong>Browser:</strong> Edge on Windows 10</p>
+                        <p>If this was you, you can ignore this message. If this wasn't you, please secure your account by:</p>
+                        <ol>
+                            <li>Changing your password immediately</li>
+                            <li>Enabling two-factor authentication</li>
+                            <li>Reviewing your recent activity</li>
+                        </ol>
+                        <p>This email was generated automatically. Please do not reply.</p>
+                        <p>Regards,<br>Microsoft Account Team</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Email selection functionality
+        document.querySelectorAll('.email-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove selection from all items
+                document.querySelectorAll('.email-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Add selection to clicked item
+                this.classList.add('selected');
+                
+                // Mark as read
+                this.classList.remove('unread');
+                
+                // Get email ID
+                const emailId = this.getAttribute('data-id');
+                
+                // Load email content (in a real app, this would fetch data)
+                loadEmailContent(emailId);
+            });
+        });
+
+        // Function to simulate loading email content
+        function loadEmailContent(emailId) {
+            // In a real app, this would fetch the email content from a server
+            const emails = {
+                1: {
+                    sender: "Microsoft Account Team",
+                    subject: "Security alert: New sign-in",
+                    date: "April 13, 10:30 AM",
+                    content: `<p>Hello,</p>
+                        <p>We detected a new sign-in to your Microsoft account.</p>
+                        <p><strong>Location:</strong> Seattle, Washington, United States</p>
+                        <p><strong>IP address:</strong> 157.54.xxx.xxx</p>
+                        <p><strong>Date and time:</strong> April 13, 2025, 10:22 AM</p>
+                        <p><strong>Browser:</strong> Edge on Windows 10</p>
+                        <p>If this was you, you can ignore this message. If this wasn't you, please secure your account by:</p>
+                        <ol>
+                            <li>Changing your password immediately</li>
+                            <li>Enabling two-factor authentication</li>
+                            <li>Reviewing your recent activity</li>
+                        </ol>
+                        <p>This email was generated automatically. Please do not reply.</p>
+                        <p>Regards,<br>Microsoft Account Team</p>`
+                },
+                2: {
+                    sender: "LinkedIn",
+                    subject: "5 new connections for you",
+                    date: "April 12, 3:45 PM",
+                    content: `<p>Hello,</p>
+                        <p>Your network is growing! Here are 5 professionals you might want to connect with:</p>
+                        <ul>
+                            <li>John Smith - Software Engineer at Microsoft</li>
+                            <li>Jane Doe - UX Designer at Google</li>
+                            <li>Mike Johnson - Product Manager at Amazon</li>
+                            <li>Sarah Williams - Data Scientist at Facebook</li>
+                            <li>Tom Brown - CTO at Startup Inc.</li>
+                        </ul>
+                        <p>Expand your network today!</p>
+                        <p>Best regards,<br>The LinkedIn Team</p>`
+                },
+                3: {
+                    sender: "Amazon",
+                    subject: "Your Order #302-5789124 has shipped",
+                    date: "April 12, 9:12 AM",
+                    content: `<p>Hello,</p>
+                        <p>Your package is on its way!</p>
+                        <p><strong>Order #:</strong> 302-5789124</p>
+                        <p><strong>Expected delivery date:</strong> April 15, 2025</p>
+                        <p>Your order contains:</p>
+                        <ul>
+                            <li>Wireless Headphones - $129.99</li>
+                            <li>Smartphone Case - $24.95</li>
+                        </ul>
+                        <p>Track your package: <a href="#">Track now</a></p>
+                        <p>Thanks for shopping with us!</p>
+                        <p>Amazon Customer Service</p>`
+                },
+                4: {
+                    sender: "GitHub",
+                    subject: "Action required: Security alert",
+                    date: "April 11, 2:20 PM",
+                    content: `<p>Hello,</p>
+                        <p>We've detected unusual activity on your GitHub account. This may indicate that your account has been compromised.</p>
+                        <p><strong>Activity detected:</strong> Multiple failed login attempts from different locations</p>
+                        <p>Please review your account activity and take action if needed:</p>
+                        <ol>
+                            <li>Reset your password</li>
+                            <li>Enable two-factor authentication if not already enabled</li>
+                            <li>Review and revoke suspicious access tokens</li>
+                        </ol>
+                        <p>If you have any questions, please contact our support team.</p>
+                        <p>Thanks,<br>GitHub Security Team</p>`
+                },
+                5: {
+                    sender: "Dropbox",
+                    subject: "John shared a folder with you",
+                    date: "April 10, 11:05 AM",
+                    content: `<p>Hello,</p>
+                        <p>John Smith has invited you to collaborate on "Project X".</p>
+                        <p>You can now:</p>
+                        <ul>
+                            <li>View, download, and comment on files</li>
+                            <li>Upload new files to the shared folder</li>
+                            <li>Edit existing documents</li>
+                        </ul>
+                        <p><a href="#">Click here</a> to view the shared folder.</p>
+                        <p>Enjoy collaborating!</p>
+                        <p>The Dropbox Team</p>`
+                },
+                6: {
+                    sender: "Slack",
+                    subject: "You have 17 unread messages",
+                    date: "April 9, 4:30 PM",
+                    content: `<p>Hello,</p>
+                        <p>You have 17 unread messages in 3 channels and 2 direct messages.</p>
+                        <p><strong>Highlights:</strong></p>
+                        <ul>
+                            <li><strong>#project-alpha:</strong> 8 new messages</li>
+                            <li><strong>#general:</strong> 5 new messages</li>
+                            <li><strong>#random:</strong> 2 new messages</li>
+                            <li><strong>Direct message from Jane:</strong> "Do you have time for a quick call?"</li>
+                            <li><strong>Direct message from Mike:</strong> "Please review the latest PR when you get a chance"</li>
+                        </ul>
+                        <p><a href="#">Catch up now</a></p>
+                        <p>The Slack Team</p>`
+                },
+                7: {
+                    sender: "Twitter",
+                    subject: "Security notice: Login from new device",
+                    date: "April 8, 7:15 PM",
+                    content: `<p>Hello,</p>
+                        <p>We noticed a login to your account from a new device on April 8, 2025 at 7:10 PM.</p>
+                        <p><strong>Device information:</strong></p>
+                        <ul>
+                            <li><strong>Device:</strong> iPhone</li>
+                            <li><strong>Location:</strong> San Francisco, CA</li>
+                            <li><strong>Browser:</strong> Safari</li>
+                        </ul>
+                        <p>If this was you, you can ignore this message. If you don't recognize this activity, please <a href="#">secure your account</a> immediately.</p>
+                        <p>Twitter Support Team</p>`
+                }
+            };
+
+            // Get the email data
+            const email = emails[emailId];
+            
+            if (email) {
+                // Update the email preview content
+                document.querySelector('.email-preview .email-subject').textContent = email.subject;
+                document.querySelector('.email-preview .email-sender').textContent = email.sender;
+                document.querySelector('.email-preview .email-date').textContent = email.date;
+                document.querySelector('.email-preview .email-content').innerHTML = email.content;
+            }
+        }
+
+        // Auto-select the first email on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstEmail = document.querySelector('.email-item');
+            if (firstEmail) {
+                firstEmail.click();
+            }
+        });
+
+        // Add click event to compose button
+        document.querySelector('.compose-btn').addEventListener('click', function() {
+            alert('This would open a new email composition window in a real application.');
+        });
+
+        // Add click events to folder items
+        document.querySelectorAll('.folder-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all folder items
+                document.querySelectorAll('.folder-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // In a real app, this would load emails from the selected folder
+                alert('This would load emails from the ' + this.textContent.trim() + ' folder in a real application.');
+            });
+        });
+    </script>
+</body>
+</html>

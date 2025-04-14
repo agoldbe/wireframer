@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Budget Visualizer</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background-color: #6c757d;
+            color: white;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .form-range::-webkit-slider-thumb {
+            background: #0d6efd;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+        }
+        .summary-item {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        .category-amount {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .savings-positive {
+            color: #198754;
+        }
+        .savings-negative {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">Simple Budget Visualizer</h1>
+        
+        <div class="row">
+            <!-- Income Section -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Monthly Income</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="incomeAmount" class="form-label">Total Monthly Income</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="incomeAmount" value="3000" min="0" step="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expense Categories Section -->
+                <div class="card">
+                    <div class="card-header">Expense Categories</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="housingRange" class="form-label">Housing: <span id="housingValue">1000</span></label>
+                            <input type="range" class="form-range" id="housingRange" min="0" max="3000" step="10" value="1000">
+                        </div>
+                        <div class="mb-3">
+                            <label for="groceriesRange" class="form-label">Groceries: <span id="groceriesValue">500</span></label>
+                            <input type="range" class="form-range" id="groceriesRange" min="0" max="1000" step="10" value="500">
+                        </div>
+                        <div class="mb-3">
+                            <label for="transportationRange" class="form-label">Transportation: <span id="transportationValue">300</span></label>
+                            <input type="range" class="form-range" id="transportationRange" min="0" max="1000" step="10" value="300">
+                        </div>
+                        <div class="mb-3">
+                            <label for="utilitiesRange" class="form-label">Utilities: <span id="utilitiesValue">200</span></label>
+                            <input type="range" class="form-range" id="utilitiesRange" min="0" max="500" step="10" value="200">
+                        </div>
+                        <div class="mb-3">
+                            <label for="entertainmentRange" class="form-label">Entertainment: <span id="entertainmentValue">300</span></label>
+                            <input type="range" class="form-range" id="entertainmentRange" min="0" max="1000" step="10" value="300">
+                        </div>
+                        <div class="mb-3">
+                            <label for="savingsRange" class="form-label">Savings Goal: <span id="savingsValue">700</span></label>
+                            <input type="range" class="form-range" id="savingsRange" min="0" max="2000" step="10" value="700">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visualization Section -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Budget Visualization</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="budgetChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Summary Section -->
+                <div class="card">
+                    <div class="card-header">Budget Summary</div>
+                    <div class="card-body">
+                        <div class="summary-item">
+                            <span>Total Income:</span>
+                            <span class="float-end category-amount" id="summaryIncome">$3,000</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Expenses:</span>
+                            <span class="float-end category-amount" id="summaryExpenses">$2,300</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Remaining / Overspent:</span>
+                            <span class="float-end category-amount" id="summaryRemaining">$700</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Savings Goal Met:</span>
+                            <span class="float-end" id="savingsGoalMet">Yes! 👍</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize chart
+        const ctx = document.getElementById('budgetChart').getContext('2d');
+        let budgetChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Housing', 'Groceries', 'Transportation', 'Utilities', 'Entertainment', 'Savings'],
+                datasets: [{
+                    data: [1000, 500, 300, 200, 300, 700],
+                    backgroundColor: [
+                        '#fd7e14',
+                        '#20c997',
+                        '#6f42c1',
+                        '#0dcaf0',
+                        '#d63384',
+                        '#198754'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Update sliders and values
+        function updateSliderValue(sliderId, valueId) {
+            const slider = document.getElementById(sliderId);
+            const valueSpan = document.getElementById(valueId);
+            valueSpan.textContent = slider.value;
+        }
+
+        // Update chart and summary
+        function updateBudget() {
+            // Get values from sliders
+            const housing = parseInt(document.getElementById('housingRange').value);
+            const groceries = parseInt(document.getElementById('groceriesRange').value);
+            const transportation = parseInt(document.getElementById('transportationRange').value);
+            const utilities = parseInt(document.getElementById('utilitiesRange').value);
+            const entertainment = parseInt(document.getElementById('entertainmentRange').value);
+            const savings = parseInt(document.getElementById('savingsRange').value);
+            const income = parseInt(document.getElementById('incomeAmount').value);
+            
+            // Update chart data
+            budgetChart.data.datasets[0].data = [housing, groceries, transportation, utilities, entertainment, savings];
+            budgetChart.update();
+            
+            // Calculate totals
+            const totalExpenses = housing + groceries + transportation + utilities + entertainment + savings;
+            const remaining = income - totalExpenses;
+            
+            // Update summary
+            document.getElementById('summaryIncome').textContent = '$' + income.toLocaleString();
+            document.getElementById('summaryExpenses').textContent = '$' + totalExpenses.toLocaleString();
+            
+            const remainingElement = document.getElementById('summaryRemaining');
+            remainingElement.textContent = '$' + Math.abs(remaining).toLocaleString();
+            
+            if (remaining >= 0) {
+                remainingElement.className = 'float-end category-amount savings-positive';
+                document.getElementById('savingsGoalMet').textContent = 'Yes! 👍';
+                document.getElementById('savingsGoalMet').className = 'float-end savings-positive';
+            } else {
+                remainingElement.className = 'float-end category-amount savings-negative';
+                document.getElementById('savingsGoalMet').textContent = 'No, over budget 👎';
+                document.getElementById('savingsGoalMet').className = 'float-end savings-negative';
+            }
+        }
+
+        // Add event listeners to all inputs
+        document.getElementById('incomeAmount').addEventListener('input', updateBudget);
+
+        const sliders = ['housingRange', 'groceriesRange', 'transportationRange', 'utilitiesRange', 'entertainmentRange', 'savingsRange'];
+        const values = ['housingValue', 'groceriesValue', 'transportationValue', 'utilitiesValue', 'entertainmentValue', 'savingsValue'];
+        
+        sliders.forEach((slider, index) => {
+            document.getElementById(slider).addEventListener('input', function() {
+                updateSliderValue(slider, values[index]);
+                updateBudget();
+            });
+        });
+        
+        // Initialize the budget
+        updateBudget();
+    </script>
+</body>
+</html>
