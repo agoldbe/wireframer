@@ -17,7 +17,6 @@ This repo simplifies the process of creating basic UI layouts (wireframes) by us
 
 Key goals:
 1. Speed up product ideation and design exploration.
-2. Use 
 2. Provide a consistent, integrated workflow within Visual Studio Code.
 3. Demonstrate the capabilities of GitHub Copilot’s Agent Mode to create and modify wireframes interactively.
 
