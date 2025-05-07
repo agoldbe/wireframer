@@ -20,6 +20,7 @@
 
 4. Style Guidelines:
    - Use semantic HTML5 elements where appropriate
+   - Use a hand drawn style for wireframes, avoiding polished UI elements i.e. dashed lines, sketchy fonts
    - Follow mobile-first design principles
    - Ensure responsive behavior across device sizes
    - Add appropriate comments for code sections
